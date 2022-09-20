@@ -21,6 +21,22 @@ export class PokemonService {
     try {
       const pokemon: Pokemon = await this.pokemonModel.create(createPokemonDto);
 
+      console.log(pokemon);
+
+      return pokemon;
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  async createMany(pokemonArray: CreatePokemonDto[]): Promise<Pokemon[]> {
+    try {
+      const pokemon: Pokemon[] = await this.pokemonModel.insertMany(
+        pokemonArray,
+      );
+
+      console.log(pokemon);
+
       return pokemon;
     } catch (error) {
       this.handleException(error);
@@ -53,10 +69,7 @@ export class PokemonService {
     return pokemon;
   }
 
-  async update(
-    term: string,
-    updatePokemonDto: UpdatePokemonDto,
-  ) {
+  async update(term: string, updatePokemonDto: UpdatePokemonDto) {
     try {
       const pokemonDB: Pokemon = await this.findOne(term);
 
@@ -69,23 +82,31 @@ export class PokemonService {
         ...pokemonDB.toJSON(),
         ...updatePokemonDto,
       };
-      
     } catch (error) {
       this.handleException(error);
     }
   }
 
   async remove(id: string) {
-  
-    const {deletedCount} = await this.pokemonModel.deleteOne({ _id: id });
-    if  (deletedCount === 0) {
+    const { deletedCount } = await this.pokemonModel.deleteOne({ _id: id });
+    if (deletedCount === 0) {
       throw new NotFoundException(`Pokemon ${id} not found`);
     }
 
     return {
       message: `Pokemon ${id} deleted`,
     };
-   
+  }
+
+  async removeAll() {
+    const { deletedCount } = await this.pokemonModel.deleteMany({});
+    if (deletedCount === 0) {
+      throw new NotFoundException(`No Pokemon found`);
+    }
+
+    return {
+      message: `All Pokemon deleted`,
+    };
   }
 
   private handleException(error: any) {
